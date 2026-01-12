@@ -5,6 +5,7 @@ import hmac
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from enum import Enum
 from typing import Dict, List, Literal
 
 from fastapi import FastAPI, HTTPException
@@ -17,12 +18,36 @@ DELIVERY_SECRET = b"delivery-secret"
 
 
 @dataclass
+class OrderStatus(str, Enum):
+    PENDING_PAYMENT = "pending_payment"
+    PENDING_ACCEPT = "pending_accept"
+    PREPARING = "preparing"
+    IN_DELIVERY = "in_delivery"
+    READY_PICKUP = "ready_pickup"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+
+class PaymentMethod(str, Enum):
+    ONLINE = "online"
+    COD = "cod"
+
+
+class DeliveryMode(str, Enum):
+    SELF_DELIVERY = "self_delivery"
+    THIRD_PARTY = "third_party"
+    PICKUP = "pickup"
+
+
+@dataclass
 class Order:
     order_id: str
     items: List["OrderItem"]
     total_price: int
     zone: str
-    status: Literal["pending", "paid", "completed"] = "pending"
+    payment_method: PaymentMethod
+    delivery_mode: DeliveryMode
+    status: OrderStatus
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -53,6 +78,8 @@ class CreateOrderRequest(BaseModel):
     items: List[OrderItem]
     total_price: int = Field(ge=0)
     zone: str
+    payment_method: PaymentMethod
+    delivery_mode: DeliveryMode
 
 
 class CreateOrderResponse(BaseModel):
@@ -137,13 +164,21 @@ def create_order(payload: CreateOrderRequest) -> CreateOrderResponse:
     validate_zone(payload.zone)
 
     order_id = str(uuid.uuid4())
+    initial_status = (
+        OrderStatus.PENDING_PAYMENT
+        if payload.payment_method == PaymentMethod.ONLINE
+        else OrderStatus.PENDING_ACCEPT
+    )
     ORDERS[order_id] = Order(
         order_id=order_id,
         items=payload.items,
         total_price=payload.total_price,
         zone=payload.zone,
+        payment_method=payload.payment_method,
+        delivery_mode=payload.delivery_mode,
+        status=initial_status,
     )
-    return CreateOrderResponse(order_id=order_id, status="pending")
+    return CreateOrderResponse(order_id=order_id, status=initial_status.value)
 
 
 @app.post("/payments/prepay", response_model=PrepayResponse)
@@ -151,7 +186,9 @@ def create_prepay(payload: PrepayRequest) -> PrepayResponse:
     order = ORDERS.get(payload.order_id)
     if not order:
         raise HTTPException(status_code=404, detail="order not found")
-    if order.status != "pending":
+    if order.payment_method != PaymentMethod.ONLINE:
+        raise HTTPException(status_code=400, detail="order not payable online")
+    if order.status != OrderStatus.PENDING_PAYMENT:
         raise HTTPException(status_code=400, detail="order not payable")
     if payload.amount != order.total_price:
         raise HTTPException(status_code=400, detail="amount mismatch")
@@ -180,10 +217,67 @@ def payment_callback(payload: PaymentCallbackRequest) -> dict:
 
     payment.transaction_id = payload.transaction_id
     payment.status = "paid"
-    order.status = "paid"
+    order.status = OrderStatus.PENDING_ACCEPT
     PROCESSED_TRANSACTIONS.add(payload.transaction_id)
 
     return {"status": "ok"}
+
+
+@app.post("/orders/{order_id}/accept")
+def accept_order(order_id: str) -> dict:
+    order = ORDERS.get(order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="order not found")
+    if order.status != OrderStatus.PENDING_ACCEPT:
+        raise HTTPException(status_code=400, detail="order not awaiting acceptance")
+    order.status = OrderStatus.PREPARING
+    return {"status": order.status.value}
+
+
+@app.post("/orders/{order_id}/reject")
+def reject_order(order_id: str) -> dict:
+    order = ORDERS.get(order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="order not found")
+    if order.status != OrderStatus.PENDING_ACCEPT:
+        raise HTTPException(status_code=400, detail="order not awaiting acceptance")
+    order.status = OrderStatus.CANCELLED
+    return {"status": order.status.value}
+
+
+@app.post("/orders/{order_id}/cancel")
+def cancel_order(order_id: str) -> dict:
+    order = ORDERS.get(order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="order not found")
+    if order.status in {OrderStatus.COMPLETED, OrderStatus.CANCELLED}:
+        raise HTTPException(status_code=400, detail="order already closed")
+    order.status = OrderStatus.CANCELLED
+    return {"status": order.status.value}
+
+
+@app.post("/orders/{order_id}/ready")
+def mark_ready(order_id: str) -> dict:
+    order = ORDERS.get(order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="order not found")
+    if order.status != OrderStatus.PREPARING:
+        raise HTTPException(status_code=400, detail="order not in preparation")
+    if order.delivery_mode == DeliveryMode.PICKUP:
+        order.status = OrderStatus.READY_PICKUP
+        return {"status": order.status.value}
+    raise HTTPException(status_code=400, detail="delivery orders should create delivery instead")
+
+
+@app.post("/orders/{order_id}/pickup")
+def pickup_order(order_id: str) -> dict:
+    order = ORDERS.get(order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="order not found")
+    if order.status != OrderStatus.READY_PICKUP:
+        raise HTTPException(status_code=400, detail="order not ready for pickup")
+    order.status = OrderStatus.COMPLETED
+    return {"status": order.status.value}
 
 
 @app.post("/deliveries", response_model=CreateDeliveryResponse)
@@ -191,14 +285,17 @@ def create_delivery(payload: CreateDeliveryRequest) -> CreateDeliveryResponse:
     order = ORDERS.get(payload.order_id)
     if not order:
         raise HTTPException(status_code=404, detail="order not found")
-    if order.status != "paid":
-        raise HTTPException(status_code=400, detail="order not paid")
+    if order.status != OrderStatus.PREPARING:
+        raise HTTPException(status_code=400, detail="order not in preparation")
+    if order.delivery_mode == DeliveryMode.PICKUP:
+        raise HTTPException(status_code=400, detail="pickup order cannot create delivery")
 
     delivery_id = str(uuid.uuid4())
     delivery = Delivery(delivery_id=delivery_id, order_id=order.order_id, address=payload.address)
     delivery.status = "in_transit"
     delivery.tracks.append(f"{datetime.now(timezone.utc).isoformat()} created")
     DELIVERIES[delivery_id] = delivery
+    order.status = OrderStatus.IN_DELIVERY
     return CreateDeliveryResponse(delivery_id=delivery_id, status=delivery.status)
 
 
@@ -221,6 +318,8 @@ def delivery_callback(payload: DeliveryCallbackRequest) -> dict:
     order = ORDERS.get(delivery.order_id)
     if not order:
         raise HTTPException(status_code=404, detail="order not found")
-    order.status = "completed"
+    if order.status != OrderStatus.IN_DELIVERY:
+        raise HTTPException(status_code=400, detail="order not in delivery")
+    order.status = OrderStatus.COMPLETED
 
     return {"status": "ok"}
