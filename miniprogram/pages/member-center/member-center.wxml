@@ -1,0 +1,32 @@
+<view class="member-center">
+  <view class="header">
+    <text class="title">{{levelName}}</text>
+    <text class="subtitle">成长值 {{growthValue}} / {{nextLevelThreshold}}</text>
+  </view>
+
+  <view class="progress">
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{progress}}%;"></view>
+    </view>
+    <text class="progress-text">距离 {{nextLevelName}} 还差 {{nextLevelThreshold - growthValue}}</text>
+  </view>
+
+  <view class="benefits">
+    <view class="benefit-card">
+      <text class="label">等级折扣</text>
+      <text class="value">{{(discountRate * 100).toFixed(0)}}%</text>
+    </view>
+    <view class="benefit-card">
+      <text class="label">积分倍率</text>
+      <text class="value">x{{pointsMultiplier}}</text>
+    </view>
+    <view class="benefit-card">
+      <text class="label">免配送门槛</text>
+      <text class="value">￥{{freeShippingThreshold}}</text>
+    </view>
+  </view>
+
+  <view class="tips">
+    <text>升级方式：累计消费、订单数或积分达标即可升级。</text>
+  </view>
+</view>
