@@ -4,17 +4,21 @@
     <text class="subtitle">成长值 {{growthValue}} / {{nextLevelThreshold}}</text>
   </view>
 
+  <view wx:if="{{selectedGoodsName}}" class="selected-goods">
+    <text>当前查看商品：{{selectedGoodsName}}</text>
+  </view>
+
   <view class="progress">
     <view class="progress-bar">
       <view class="progress-fill" style="width: {{progress}}%;"></view>
     </view>
-    <text class="progress-text">距离 {{nextLevelName}} 还差 {{nextLevelThreshold - growthValue}}</text>
+    <text class="progress-text">距离 {{nextLevelName}} 还差 {{remainingGrowth}}</text>
   </view>
 
   <view class="benefits">
     <view class="benefit-card">
       <text class="label">等级折扣</text>
-      <text class="value">{{(discountRate * 100).toFixed(0)}}%</text>
+      <text class="value">{{discountRatePercent}}%</text>
     </view>
     <view class="benefit-card">
       <text class="label">积分倍率</text>
@@ -28,5 +32,10 @@
 
   <view class="tips">
     <text>升级方式：累计消费、订单数或积分达标即可升级。</text>
+  </view>
+
+  <view class="footer">
+    <text class="cart">购物车 {{cartCount}}</text>
+    <button size="mini" type="primary" bindtap="goToGoods">返回商品页</button>
   </view>
 </view>

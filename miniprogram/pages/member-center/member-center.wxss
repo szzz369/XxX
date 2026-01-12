@@ -7,7 +7,7 @@
   background: #ffffff;
   padding: 32rpx;
   border-radius: 24rpx;
-  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.06);
+  box-shadow: 0 12rpx 24rpx rgba(0, 0, 0, 0.06);
   margin-bottom: 32rpx;
 }
 
@@ -27,6 +27,7 @@
   padding: 24rpx;
   border-radius: 20rpx;
   margin-bottom: 32rpx;
+  box-shadow: 0 10rpx 22rpx rgba(0, 0, 0, 0.05);
 }
 
 .progress-bar {
@@ -58,7 +59,7 @@
   padding: 24rpx;
   border-radius: 18rpx;
   text-align: center;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8rpx 16rpx rgba(0, 0, 0, 0.05);
 }
 
 .label {
@@ -78,4 +79,29 @@
   margin-top: 28rpx;
   color: #777777;
   font-size: 24rpx;
+}
+
+.selected-goods {
+  margin: 16rpx 0;
+  padding: 16rpx;
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  font-size: 26rpx;
+  box-shadow: 0 8rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.footer {
+  margin-top: 32rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cart {
+  font-size: 24rpx;
+  color: #ff6a4d;
+}
+
+.footer button {
+  border-radius: 999rpx;
 }
