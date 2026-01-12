@@ -1,0 +1,33 @@
+<view class="goods-page">
+  <view class="goods-header">
+    <text class="title">今日推荐</text>
+    <text class="badge">购物车 {{cartCount}}</text>
+  </view>
+
+  <view wx:if="{{selectedGoodsName}}" class="selected">
+    <text>已选商品：{{selectedGoodsName}}</text>
+  </view>
+
+  <view class="goods-list">
+    <view
+      class="goods-card"
+      wx:for="{{goods}}"
+      wx:key="id"
+      data-goods="{{item}}"
+    >
+      <view class="goods-info">
+        <text class="goods-name">{{item.name}}</text>
+        <text class="goods-price">￥{{item.price}}</text>
+        <text class="goods-stock">库存 {{item.stock}}</text>
+      </view>
+      <view class="goods-actions">
+        <button size="mini" bindtap="addToCart" data-goods="{{item}}">
+          加入购物车
+        </button>
+        <button size="mini" type="primary" bindtap="selectGoods" data-goods="{{item}}">
+          查看会员权益
+        </button>
+      </view>
+    </view>
+  </view>
+</view>
