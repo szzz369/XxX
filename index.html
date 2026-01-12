@@ -1,126 +1,35 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>购物应用</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <div class="app">
-      <header class="topbar">
-        <h1 id="page-title">首页</h1>
-      </header>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>购物应用原型</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <h1 id="page-title">首页</h1>
+    </header>
 
-      <main class="content" id="view"></main>
+    <main id="main-content" class="main-content"></main>
 
-      <nav class="tabbar">
-        <a href="#/home" data-route="home" class="tab active">首页</a>
-        <a href="#/cart" data-route="cart" class="tab">购物车</a>
-        <a href="#/order" data-route="order" class="tab">订单</a>
-        <a href="#/points" data-route="points" class="tab">积分</a>
-      </nav>
-    </div>
+    <nav class="tabbar">
+      <button class="tabbar-item" data-route="home">
+        <span>首页</span>
+      </button>
+      <button class="tabbar-item" data-route="cart">
+        <span>购物车</span>
+      </button>
+      <button class="tabbar-item" data-route="orders">
+        <span>订单</span>
+      </button>
+      <button class="tabbar-item" data-route="points">
+        <span>积分中心</span>
+      </button>
+    </nav>
+  </div>
 
-    <template id="home-template">
-      <section class="panel">
-        <h2>欢迎使用商城</h2>
-        <p>通过底部 tabbar 切换模块，体验购物车、订单详情与积分中心。</p>
-        <div class="highlight">
-          <h3>今日推荐</h3>
-          <p>轻松下单，实时查看物流与售后服务。</p>
-        </div>
-      </section>
-    </template>
-
-    <template id="cart-template">
-      <section class="panel">
-        <h2>购物车</h2>
-        <p class="hint">购物车内容会自动保存在本地，刷新后依旧保留。</p>
-        <div class="cart-items" id="cart-items"></div>
-        <div class="cart-summary">
-          <div>
-            <span>商品总价</span>
-            <strong id="cart-total">¥0.00</strong>
-          </div>
-          <button id="checkout">去结算</button>
-        </div>
-      </section>
-    </template>
-
-    <template id="order-template">
-      <section class="panel">
-        <h2>订单详情</h2>
-        <div class="order-card">
-          <div class="order-meta">
-            <div>
-              <span>订单编号</span>
-              <strong>#2024-0918</strong>
-            </div>
-            <div>
-              <span>订单状态</span>
-              <strong class="status">运输中</strong>
-            </div>
-          </div>
-          <h3>配送轨迹</h3>
-          <ul class="timeline">
-            <li>
-              <span class="dot active"></span>
-              <div>
-                <p>包裹已从上海转运中心发出</p>
-                <time>2024-09-18 10:45</time>
-              </div>
-            </li>
-            <li>
-              <span class="dot"></span>
-              <div>
-                <p>包裹到达杭州分拨中心</p>
-                <time>2024-09-19 06:20</time>
-              </div>
-            </li>
-            <li>
-              <span class="dot"></span>
-              <div>
-                <p>派送中，预计今日送达</p>
-                <time>2024-09-19 09:30</time>
-              </div>
-            </li>
-          </ul>
-          <div class="after-sale">
-            <span>需要帮助？</span>
-            <a href="#/after-sale" class="link">进入售后入口</a>
-          </div>
-        </div>
-      </section>
-    </template>
-
-    <template id="points-template">
-      <section class="panel">
-        <h2>积分中心</h2>
-        <div class="points-balance">
-          <div>
-            <span>当前积分</span>
-            <strong id="points-balance">12,480</strong>
-          </div>
-          <button id="points-recharge">积分充值</button>
-        </div>
-        <h3>积分流水</h3>
-        <ul class="points-history" id="points-history"></ul>
-      </section>
-    </template>
-
-    <template id="after-sale-template">
-      <section class="panel">
-        <h2>售后服务</h2>
-        <p>请选择需要的服务类型，我们会尽快处理。</p>
-        <div class="after-sale-actions">
-          <button>申请退货</button>
-          <button>申请换货</button>
-          <button>联系客服</button>
-        </div>
-      </section>
-    </template>
-
-    <script src="app.js"></script>
-  </body>
+  <script src="app.js"></script>
+</body>
 </html>
