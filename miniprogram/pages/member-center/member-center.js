@@ -19,6 +19,7 @@ Page({
     const selectedGoodsName =
       options.selected || (app.globalData.selectedGoods?.name ?? '');
     this.setData({ selectedGoodsName });
+    this.fetchMemberSummary();
     this.updateProgress();
   },
   onShow() {
@@ -30,6 +31,29 @@ Page({
     const remainingGrowth = Math.max(0, nextLevelThreshold - growthValue);
     const discountRatePercent = Math.round(discountRate * 100);
     this.setData({ progress, remainingGrowth, discountRatePercent });
+  },
+  fetchMemberSummary() {
+    wx.request({
+      url: `${app.globalData.apiBaseUrl}/members/summary`,
+      method: 'GET',
+      success: (res) => {
+        const data = res?.data?.data;
+        if (!data) {
+          return;
+        }
+        this.setData({
+          levelName: data.levelName ?? this.data.levelName,
+          growthValue: data.growthValue ?? this.data.growthValue,
+          nextLevelName: data.nextLevelName ?? this.data.nextLevelName,
+          nextLevelThreshold: data.nextLevelThreshold ?? this.data.nextLevelThreshold,
+          discountRate: data.discountRate ?? this.data.discountRate,
+          pointsMultiplier: data.pointsMultiplier ?? this.data.pointsMultiplier,
+          freeShippingThreshold:
+            data.freeShippingThreshold ?? this.data.freeShippingThreshold,
+        });
+        this.updateProgress();
+      },
+    });
   },
   goToGoods() {
     wx.switchTab({ url: '/pages/goods/index' });

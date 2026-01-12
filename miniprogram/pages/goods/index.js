@@ -2,15 +2,13 @@ const app = getApp();
 
 Page({
   data: {
-    goods: [
-      { id: 'sku-1', name: '会员精选咖啡豆', price: 68, stock: 20 },
-      { id: 'sku-2', name: '轻食沙拉', price: 42, stock: 15 },
-      { id: 'sku-3', name: '能量果昔', price: 32, stock: 25 },
-    ],
+    goods: [],
     selectedGoodsName: '',
     cartCount: 0,
+    isLoading: true,
   },
   onLoad() {
+    this.fetchGoods();
     this.refreshGlobalState();
   },
   onShow() {
@@ -21,6 +19,34 @@ Page({
     this.setData({
       selectedGoodsName: selectedGoods ? selectedGoods.name : '',
       cartCount,
+    });
+  },
+  fetchGoods() {
+    this.setData({ isLoading: true });
+    wx.request({
+      url: `${app.globalData.apiBaseUrl}/goods`,
+      method: 'GET',
+      success: (res) => {
+        const list = res?.data?.data ?? [];
+        if (Array.isArray(list) && list.length > 0) {
+          this.setData({ goods: list, isLoading: false });
+          return;
+        }
+        this.useFallbackGoods();
+      },
+      fail: () => {
+        this.useFallbackGoods();
+      },
+    });
+  },
+  useFallbackGoods() {
+    this.setData({
+      goods: [
+        { id: 'sku-1', name: '会员精选咖啡豆', price: 68, stock: 20 },
+        { id: 'sku-2', name: '轻食沙拉', price: 42, stock: 15 },
+        { id: 'sku-3', name: '能量果昔', price: 32, stock: 25 },
+      ],
+      isLoading: false,
     });
   },
   selectGoods(event) {

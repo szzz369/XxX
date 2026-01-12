@@ -8,7 +8,15 @@
     <text>已选商品：{{selectedGoodsName}}</text>
   </view>
 
-  <view class="goods-list">
+  <view wx:if="{{isLoading}}" class="loading">
+    <text>商品加载中...</text>
+  </view>
+
+  <view wx:elif="{{goods.length === 0}}" class="empty">
+    <text>暂无商品</text>
+  </view>
+
+  <view wx:else class="goods-list">
     <view
       class="goods-card"
       wx:for="{{goods}}"
