@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>充值中心</title>
+    <style>
+      body {
+        font-family: "PingFang SC", "Microsoft Yahei", sans-serif;
+        margin: 0;
+        padding: 24px;
+        background: #f7f8fa;
+      }
+      .container {
+        max-width: 720px;
+        margin: 0 auto;
+      }
+      .card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 6px 16px rgba(15, 26, 47, 0.08);
+      }
+      .plan {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+      }
+      .plan:last-child {
+        border-bottom: none;
+      }
+      .plan h3 {
+        margin: 0;
+        font-size: 18px;
+      }
+      .plan p {
+        margin: 4px 0 0;
+        color: #6b7280;
+      }
+      .badge {
+        background: #fff7ed;
+        color: #f97316;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h2>充值档位</h2>
+        <p>公司ID：{{ company_id }}</p>
+      </div>
+      <div class="card">
+        {% if plans %}
+          {% for plan in plans %}
+            <div class="plan">
+              <div>
+                <h3>{{ plan.name }} - ¥{{ "%.2f"|format(plan.amount) }}</h3>
+                <p>
+                  {% if plan.bonus_amount %}
+                    赠送 ¥{{ "%.2f"|format(plan.bonus_amount) }}
+                  {% endif %}
+                  {% if plan.bonus_points %}
+                    {% if plan.bonus_amount %} | {% endif %}
+                    赠送 {{ plan.bonus_points }} 积分
+                  {% endif %}
+                </p>
+              </div>
+              <span class="badge">
+                {% if plan.bonus_amount or plan.bonus_points %}
+                  优惠中
+                {% else %}
+                  标准
+                {% endif %}
+              </span>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p>暂无可用充值档位。</p>
+        {% endif %}
+      </div>
+    </div>
+  </body>
+</html>
