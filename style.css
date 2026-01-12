@@ -1,0 +1,272 @@
+:root {
+  color-scheme: light;
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --primary: #ff6b00;
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #1f1f1f;
+  --muted: #6c6c6c;
+  --border: #e3e7ef;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  padding: 20px 24px 12px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.content {
+  flex: 1;
+  padding: 20px 18px 92px;
+}
+
+.tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  height: 64px;
+  align-items: center;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.tab {
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.tab.active {
+  color: var(--primary);
+}
+
+.panel {
+  background: var(--card);
+  padding: 18px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(20, 20, 20, 0.06);
+}
+
+.panel h2 {
+  margin-bottom: 12px;
+  font-size: 20px;
+}
+
+.highlight {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fff1e6, #fff9f4);
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.cart-item h4 {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.cart-item span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.quantity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quantity button {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+}
+
+.cart-summary {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cart-summary strong {
+  font-size: 20px;
+  color: var(--primary);
+}
+
+.cart-summary button {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 18px;
+  cursor: pointer;
+}
+
+.order-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.order-meta {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.status {
+  color: #16a34a;
+}
+
+.timeline {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.timeline li {
+  display: flex;
+  gap: 12px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #cbd5f5;
+  margin-top: 6px;
+}
+
+.dot.active {
+  background: var(--primary);
+}
+
+.timeline time {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.after-sale {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fdf4f0;
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.link {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.points-balance {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  background: #fff6e9;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.points-balance strong {
+  font-size: 22px;
+  color: var(--primary);
+}
+
+.points-balance button {
+  background: var(--primary);
+  border: none;
+  color: #fff;
+  border-radius: 999px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.points-history {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.points-history li {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.points-history span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.after-sale-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.after-sale-actions button {
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+}
