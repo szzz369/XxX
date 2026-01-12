@@ -8,13 +8,13 @@
     <view class="progress-bar">
       <view class="progress-fill" style="width: {{progress}}%;"></view>
     </view>
-    <text class="progress-text">距离 {{nextLevelName}} 还差 {{nextLevelThreshold - growthValue}}</text>
+    <text class="progress-text">距离 {{nextLevelName}} 还差 {{remainingGrowth}}</text>
   </view>
 
   <view class="benefits">
     <view class="benefit-card">
       <text class="label">等级折扣</text>
-      <text class="value">{{(discountRate * 100).toFixed(0)}}%</text>
+      <text class="value">{{discountRatePercent}}%</text>
     </view>
     <view class="benefit-card">
       <text class="label">积分倍率</text>
