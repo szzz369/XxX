@@ -1,3 +1,5 @@
+const app = getApp();
+
 Page({
   data: {
     levelName: '普通会员',
@@ -7,13 +9,29 @@ Page({
     discountRate: 0.95,
     pointsMultiplier: 1.2,
     freeShippingThreshold: 88,
+    progress: 0,
+    remainingGrowth: 0,
+    discountRatePercent: 0,
+    selectedGoodsName: '',
+    cartCount: 0,
   },
-  onLoad() {
+  onLoad(options) {
+    const selectedGoodsName =
+      options.selected || (app.globalData.selectedGoods?.name ?? '');
+    this.setData({ selectedGoodsName });
     this.updateProgress();
   },
+  onShow() {
+    this.setData({ cartCount: app.globalData.cartCount });
+  },
   updateProgress() {
-    const { growthValue, nextLevelThreshold } = this.data;
+    const { growthValue, nextLevelThreshold, discountRate } = this.data;
     const progress = Math.min(100, Math.floor((growthValue / nextLevelThreshold) * 100));
-    this.setData({ progress });
+    const remainingGrowth = Math.max(0, nextLevelThreshold - growthValue);
+    const discountRatePercent = Math.round(discountRate * 100);
+    this.setData({ progress, remainingGrowth, discountRatePercent });
+  },
+  goToGoods() {
+    wx.switchTab({ url: '/pages/goods/index' });
   },
 });

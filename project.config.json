@@ -1,0 +1,13 @@
+{
+  "miniprogramRoot": "miniprogram/",
+  "projectname": "wechat-miniprogram",
+  "appid": "wx6ac3f5090a6b99c5",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "minified": false,
+    "postcss": true
+  },
+  "libVersion": "2.32.4"
+}

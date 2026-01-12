@@ -1,0 +1,23 @@
+{
+  "pages": [
+    "pages/goods/index",
+    "pages/member-center/member-center"
+  ],
+  "tabBar": {
+    "list": [
+      {
+        "pagePath": "pages/goods/index",
+        "text": "商品"
+      },
+      {
+        "pagePath": "pages/member-center/member-center",
+        "text": "会员"
+      }
+    ]
+  },
+  "window": {
+    "navigationBarTitleText": "微信小程序",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black"
+  }
+}
