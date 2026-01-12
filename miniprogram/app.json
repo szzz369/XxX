@@ -1,0 +1,10 @@
+{
+  "pages": [
+    "pages/member-center/member-center"
+  ],
+  "window": {
+    "navigationBarTitleText": "微信小程序",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black"
+  }
+}
