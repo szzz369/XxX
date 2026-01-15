@@ -15,6 +15,10 @@ const routes = {
     title: "积分中心",
     render: renderPoints,
   },
+  admin: {
+    title: "管理后台",
+    render: renderAdmin,
+  },
 };
 
 const defaultCart = [
@@ -111,6 +115,11 @@ function renderHome() {
         <li class="list-item">冷链全程监控<span>❄️</span></li>
         <li class="list-item">售后无忧保障<span>🛡️</span></li>
       </ul>
+    </section>
+    <section class="card">
+      <h2>运营管理入口</h2>
+      <p class="notice">进入管理后台查看订单、配送与积分运营数据。</p>
+      <button class="action-button" type="button" data-route-link="admin">进入管理后台</button>
     </section>
   `;
 }
@@ -228,6 +237,52 @@ function renderPoints() {
   `;
 }
 
+function renderAdmin() {
+  return `
+    <section class="card">
+      <h2>管理后台概览</h2>
+      <p class="notice">对应后端模块：认证、菜单、订单、支付、配送、积分与统一管理。</p>
+      <div class="module-grid">
+        <div class="module-card">
+          <div class="module-title"><span>auth</span><span class="badge">用户</span></div>
+          <div class="module-meta">账号登录、权限认证、会话管理。</div>
+        </div>
+        <div class="module-card">
+          <div class="module-title"><span>menu</span><span class="badge">商品</span></div>
+          <div class="module-meta">商品菜单、分类配置、上下架管理。</div>
+        </div>
+        <div class="module-card">
+          <div class="module-title"><span>order</span><span class="badge">订单</span></div>
+          <div class="module-meta">订单接单、状态流转、售后处理。</div>
+        </div>
+        <div class="module-card">
+          <div class="module-title"><span>payment</span><span class="badge">支付</span></div>
+          <div class="module-meta">支付渠道配置、交易回调对账。</div>
+        </div>
+        <div class="module-card">
+          <div class="module-title"><span>delivery</span><span class="badge">配送</span></div>
+          <div class="module-meta">履约方式、骑手轨迹、签收状态。</div>
+        </div>
+        <div class="module-card">
+          <div class="module-title"><span>points</span><span class="badge">积分</span></div>
+          <div class="module-meta">积分规则、营销配置与对账。</div>
+        </div>
+      </div>
+    </section>
+    <section class="card">
+      <h2>快捷操作</h2>
+      <div class="list">
+        <div class="list-item"><span>今日待处理订单</span><span>18</span></div>
+        <div class="list-item"><span>待处理退款申请</span><span>3</span></div>
+        <div class="list-item"><span>配送异常预警</span><span>2</span></div>
+      </div>
+      <button class="action-button" type="button" data-route-link="orders" style="margin-top: 12px;">
+        查看订单详情
+      </button>
+    </section>
+  `;
+}
+
 function renderRoute(routeKey) {
   const route = routes[routeKey] || routes.home;
   const mainContent = document.getElementById("main-content");
@@ -235,6 +290,7 @@ function renderRoute(routeKey) {
   title.textContent = route.title;
   mainContent.innerHTML = route.render();
   attachCartHandlers(routeKey);
+  attachRouteLinks();
 }
 
 function attachCartHandlers(routeKey) {
@@ -256,6 +312,14 @@ function attachCartHandlers(routeKey) {
       saveCart(updated);
       renderRoute("cart");
     });
+  });
+}
+
+function attachRouteLinks() {
+  const mainContent = document.getElementById("main-content");
+  const links = mainContent.querySelectorAll("[data-route-link]");
+  links.forEach((link) => {
+    link.addEventListener("click", () => navigate(link.dataset.routeLink));
   });
 }
 
