@@ -43,6 +43,19 @@ const defaultCart = [
 ];
 
 const cartStorageKey = "demo-cart";
+const pointsStorageKey = "demo-points";
+const pointsHistoryKey = "demo-points-history";
+
+const defaultPoints = {
+  balance: 3280,
+};
+
+const defaultPointsHistory = [
+  { label: "4/10 购物返积分", value: 120 },
+  { label: "4/08 运费抵扣", value: -80 },
+  { label: "4/05 充值赠送", value: 300 },
+  { label: "4/01 完成订单", value: 90 },
+];
 
 const currencyFormatter = new Intl.NumberFormat("zh-CN", {
   style: "currency",
@@ -69,6 +82,50 @@ function loadCart() {
 
 function saveCart(items) {
   localStorage.setItem(cartStorageKey, JSON.stringify(items));
+}
+
+function loadPoints() {
+  const stored = localStorage.getItem(pointsStorageKey);
+  if (!stored) {
+    localStorage.setItem(pointsStorageKey, JSON.stringify(defaultPoints));
+    return { ...defaultPoints };
+  }
+  try {
+    const parsed = JSON.parse(stored);
+    if (parsed && typeof parsed.balance === "number") {
+      return parsed;
+    }
+  } catch (error) {
+    console.warn("积分缓存解析失败，已重置。", error);
+  }
+  localStorage.setItem(pointsStorageKey, JSON.stringify(defaultPoints));
+  return { ...defaultPoints };
+}
+
+function savePoints(points) {
+  localStorage.setItem(pointsStorageKey, JSON.stringify(points));
+}
+
+function loadPointsHistory() {
+  const stored = localStorage.getItem(pointsHistoryKey);
+  if (!stored) {
+    localStorage.setItem(pointsHistoryKey, JSON.stringify(defaultPointsHistory));
+    return [...defaultPointsHistory];
+  }
+  try {
+    const parsed = JSON.parse(stored);
+    if (Array.isArray(parsed)) {
+      return parsed;
+    }
+  } catch (error) {
+    console.warn("积分流水缓存解析失败，已重置。", error);
+  }
+  localStorage.setItem(pointsHistoryKey, JSON.stringify(defaultPointsHistory));
+  return [...defaultPointsHistory];
+}
+
+function savePointsHistory(history) {
+  localStorage.setItem(pointsHistoryKey, JSON.stringify(history));
 }
 
 function updateQuantity(items, id, delta) {
@@ -151,7 +208,10 @@ function renderCart() {
 
   return `
     <section class="card">
-      <h2>购物车商品</h2>
+      <div class="section-header">
+        <h2>购物车商品</h2>
+        <button class="ghost-button" type="button" data-action="clear-cart">清空</button>
+      </div>
       ${itemsMarkup || '<p class="notice">购物车为空，去首页选购吧。</p>'}
     </section>
     <section class="card">
@@ -166,6 +226,14 @@ function renderCart() {
         <span>${formatPrice(total)}</span>
       </div>
       <p class="notice" style="margin-top: 8px;">提示：商品数量变动后将实时更新价格。</p>
+      <div class="button-row">
+        <button class="action-button" type="button" data-action="checkout" ${cartItems.length ? "" : "disabled"}>
+          去结算
+        </button>
+        <button class="secondary-button" type="button" data-action="save-cart" ${cartItems.length ? "" : "disabled"}>
+          保存购物车
+        </button>
+      </div>
     </section>
   `;
 }
@@ -209,29 +277,34 @@ function renderOrders() {
     <section class="card">
       <h2>售后服务</h2>
       <p class="notice">如需退款或补寄，请点击下方入口。</p>
-      <button class="action-button" type="button">申请售后</button>
+      <button class="action-button" type="button" data-action="after-sale">申请售后</button>
     </section>
   `;
 }
 
 function renderPoints() {
+  const points = loadPoints();
+  const history = loadPointsHistory();
+  const historyMarkup = history
+    .map((item) => {
+      const sign = item.value > 0 ? "+" : "";
+      return `<div class="list-item"><span>${item.label}</span><span>${sign}${item.value}</span></div>`;
+    })
+    .join("");
   return `
     <section class="card">
       <h2>积分余额</h2>
-      <div class="highlight">3,280 积分</div>
+      <div class="highlight">${points.balance.toLocaleString("zh-CN")} 积分</div>
       <p class="notice">积分可抵扣运费或兑换礼品。</p>
       <div class="grid-2" style="margin-top: 12px;">
-        <button class="action-button" type="button">立即充值</button>
-        <button class="action-button" type="button" style="background:#111827;">兑换礼品</button>
+        <button class="action-button" type="button" data-action="recharge-points">立即充值</button>
+        <button class="action-button dark" type="button" data-action="redeem-points">兑换礼品</button>
       </div>
     </section>
     <section class="card">
       <h2>积分流水</h2>
       <div class="list">
-        <div class="list-item"><span>4/10 购物返积分</span><span>+120</span></div>
-        <div class="list-item"><span>4/08 运费抵扣</span><span>-80</span></div>
-        <div class="list-item"><span>4/05 充值赠送</span><span>+300</span></div>
-        <div class="list-item"><span>4/01 完成订单</span><span>+90</span></div>
+        ${historyMarkup}
       </div>
     </section>
   `;
@@ -291,6 +364,7 @@ function renderRoute(routeKey) {
   mainContent.innerHTML = route.render();
   attachCartHandlers(routeKey);
   attachRouteLinks();
+  attachActionHandlers();
 }
 
 function attachCartHandlers(routeKey) {
@@ -321,6 +395,178 @@ function attachRouteLinks() {
   links.forEach((link) => {
     link.addEventListener("click", () => navigate(link.dataset.routeLink));
   });
+}
+
+function attachActionHandlers() {
+  const mainContent = document.getElementById("main-content");
+  const actions = mainContent.querySelectorAll("[data-action]");
+  actions.forEach((button) => {
+    button.addEventListener("click", () => handleAction(button.dataset.action));
+  });
+}
+
+function handleAction(action) {
+  switch (action) {
+    case "after-sale":
+      openModal({
+        title: "售后申请",
+        description: "我们将为你创建售后工单，预计 10 分钟内响应。",
+        confirmText: "提交申请",
+        onConfirm: () => showToast("售后申请已提交，请留意客服消息。"),
+      });
+      break;
+    case "recharge-points":
+      openModal({
+        title: "积分充值",
+        description: "选择充值档位即可获得额外赠送积分。",
+        confirmText: "确认充值",
+        onConfirm: () => {
+          const bonus = 300;
+          updatePointsBalance(bonus, "积分充值赠送");
+          showToast(`充值成功，已到账 ${bonus} 积分`);
+        },
+      });
+      break;
+    case "redeem-points":
+      openModal({
+        title: "兑换礼品",
+        description: "本次兑换将扣除 200 积分，确认继续？",
+        confirmText: "确认兑换",
+        onConfirm: () => {
+          const cost = 200;
+          const points = loadPoints();
+          if (points.balance < cost) {
+            showToast("积分不足，快去充值吧！");
+            return;
+          }
+          updatePointsBalance(-cost, "礼品兑换");
+          showToast("兑换成功，礼品已加入配送清单。");
+        },
+      });
+      break;
+    case "clear-cart":
+      openModal({
+        title: "清空购物车",
+        description: "确认清空所有商品吗？",
+        confirmText: "确认清空",
+        onConfirm: () => {
+          saveCart([]);
+          renderRoute("cart");
+          showToast("购物车已清空。");
+        },
+      });
+      break;
+    case "checkout":
+      openModal({
+        title: "提交订单",
+        description: "预计 30 分钟内送达，确认提交订单吗？",
+        confirmText: "确认提交",
+        onConfirm: () => {
+          saveCart([]);
+          renderRoute("orders");
+          showToast("订单已提交，配送中。");
+        },
+      });
+      break;
+    case "save-cart":
+      showToast("购物车已保存，下次打开将自动恢复。");
+      break;
+    default:
+      showToast("功能正在建设中。");
+  }
+}
+
+function updatePointsBalance(delta, label) {
+  const points = loadPoints();
+  const nextBalance = Math.max(0, points.balance + delta);
+  savePoints({ balance: nextBalance });
+  const history = loadPointsHistory();
+  const today = new Date();
+  const dateLabel = `${today.getMonth() + 1}/${today.getDate()}`;
+  const nextHistory = [
+    { label: `${dateLabel} ${label}`, value: delta },
+    ...history,
+  ].slice(0, 6);
+  savePointsHistory(nextHistory);
+  renderRoute("points");
+}
+
+function ensureToastContainer() {
+  let container = document.querySelector(".toast-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.className = "toast-container";
+    document.body.appendChild(container);
+  }
+  return container;
+}
+
+function showToast(message) {
+  const container = ensureToastContainer();
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = message;
+  container.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.classList.add("show");
+  });
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 300);
+  }, 2400);
+}
+
+function ensureModal() {
+  let modal = document.querySelector(".modal-overlay");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.className = "modal-overlay";
+    modal.innerHTML = `
+      <div class="modal-card">
+        <h3 class="modal-title"></h3>
+        <p class="modal-description"></p>
+        <div class="modal-actions">
+          <button class="ghost-button" type="button" data-modal-action="cancel">取消</button>
+          <button class="action-button" type="button" data-modal-action="confirm">确认</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+  return modal;
+}
+
+function openModal({ title, description, confirmText, onConfirm }) {
+  const modal = ensureModal();
+  modal.querySelector(".modal-title").textContent = title;
+  modal.querySelector(".modal-description").textContent = description;
+  const confirmButton = modal.querySelector('[data-modal-action="confirm"]');
+  confirmButton.textContent = confirmText || "确认";
+  const cancelButton = modal.querySelector('[data-modal-action="cancel"]');
+
+  const closeModal = () => {
+    modal.classList.remove("open");
+    confirmButton.removeEventListener("click", onConfirmClick);
+    cancelButton.removeEventListener("click", onCancelClick);
+  };
+
+  const onConfirmClick = () => {
+    if (typeof onConfirm === "function") {
+      onConfirm();
+    }
+    closeModal();
+  };
+
+  const onCancelClick = () => closeModal();
+
+  confirmButton.addEventListener("click", onConfirmClick);
+  cancelButton.addEventListener("click", onCancelClick);
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) {
+      closeModal();
+    }
+  }, { once: true });
+  modal.classList.add("open");
 }
 
 function setActiveTab(routeKey) {
